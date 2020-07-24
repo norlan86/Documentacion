@@ -1,5 +1,5 @@
-# Este repositorio contiene documentación de proceso, utiles para no olvidar
+# Este repositorio contiene documentación de proceso, útiles para no olvidar
 
 # Indice
-- [Configuracion de IMS VMware a RHVM ](ims_vmare_to_rhv.md)
+- [Configuración de IMS VMware a RHVM ](ims_vmware_to_rhv.md)
 

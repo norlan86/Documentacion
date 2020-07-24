@@ -26,19 +26,19 @@ Las versiones de software soportadas por IMS en version 1.2 son:
  
 3. SO Operativos soportados: El listado de los SO soportados para migración se encuentran [Aquí](https://access.redhat.com/articles/973163)
 
-## Preparacion del ambiente VMware.
+## Preparación del ambiente VMware.
 Las VMs, deben garantizar los siguientes ajustes:
 - Tener instaladas las VMtools.
 - NO contar con imágenes ISO montadas, o agregadas.
 - Asegurarse que cada interface de red solo cuente con un dirección IPv4 o IPv6.
 - El nombre de la VM solo debe contener caracteres (-_. ó A-Za-Z ó 0-9).
-- Asegurese que el nombre de la VM no este duplicado sobre el ambiente RHV.
+- Asegúrese que el nombre de la VM no este duplicado sobre el ambiente RHV.
 
-## Preparacion del ambiente RHV.
+## Preparación del ambiente RHV.
 Sobre el ambiente de Red hat Virtualization, se deben garantizar los siguientes ajustes:
 - Definir un Domain Data, con suficiente espacio para la almacenar las VM a migrar.
 - Definir un Domain ISO, que contenga las imágenes iso para las RHV-tools y virtIO.
-- Cargar las imágenes iso [RHV-Tools y VirtIO](https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.3/html-single/administration_guide/index#Uploading_the_VirtIO_and_Guest_Tool_Image_Files_to_an_ISO_Storage_Domain) al Damain ISO.
+- Cargar las imágenes iso [RHV-Tools y VirtIO](https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.3/html-single/administration_guide/index#Uploading_the_VirtIO_and_Guest_Tool_Image_Files_to_an_ISO_Storage_Domain) al Domain ISO.
 
 - Activar los repositorios necesarios sobre rhv-manager y (rhv-host)
 
@@ -156,8 +156,8 @@ Enter file in which to save the key (/root/.ssh/id_rsa): [Press enter key]
 Created directory '/root/.ssh'.
 Enter passphrase (empty for no passphrase): [Press enter key]
 Enter same passphrase again: [Press enter key]
-Your identification has been saved in /home/tecmint/.ssh/id_rsa.
-Your public key has been saved in /home/tecmint/.ssh/id_rsa.pub.
+Your identification has been saved in /root/.ssh/id_rsa.
+Your public key has been saved in /root/.ssh/id_rsa.pub.
 The key fingerprint is:
 5f:ad:40:00:8a:d1:9b:99:b3:b0:f8:08:99:c3:ed:d3 tecmint@tecmint.com
 The key's randomart image is:
@@ -249,27 +249,27 @@ Se confirma el mapa de computo o el cluster que alojara las maquinas
 Se configura el mapa de Storage o los datastores/domains que alojaran las maquinas
 ![](images/Create_infra_Sett_03.png)
 
-Luego se mapeo el Networking o las vlan que seran usadas
+Luego se mapeo el Networking o las vlan que serán usadas
 ![](images/Create_infra_Sett_04.png)
 
 Una vez se mapea la infraestructura finaliza el proceso
 ![](images/Create_infra_Sett_05.png)
 
-- Crear un Plan de migracion
+- Crear un Plan de migración
 
-Finalmente se crean un plan de migracion donde se indica las vms a ser migradas.
+Finalmente se crean un plan de migración donde se indica las vms a ser migradas.
 
 ![](images/conv_host_mig_sett_12.png)
 
-Se define un nombre y una descripcion para el plan, se tiene dos opciones para escojer las maquinas. La primera opciones es escojerlas del listado de maquinas que reconoce cloudforms acotadas segun el mapa de infraestura y la segunda es selecionarlas desde el fichero .csv que se creo anteriomente.
-para efectos practics se usa la primera opcion.
+Se define un nombre y una descripción para el plan, se tiene dos opciones para escocer las maquinas. La primera opciones es escogerlas del listado de maquinas que reconoce cloudforms acotadas según el mapa de infraestura y la segunda es seleccionarlas desde el fichero .csv que se creo anteriormente.
+para efectos prácticos se usa la primera opción.
 ![](images/conv_host_mig_sett_13.png)
 
 Para el ejemplo solo se migraran la maquinas Windows 2008
 
 ![](images/conv_host_mig_sett_14.png)
 
-En las opciones avanzada se plantea la ejecución de un playbook que se ejecuta andtes de inciar el proceso de migración y otro luego del proceso de migración.
+En las opciones avanzada se plantea la ejecución de un playbook que se ejecuta antes de iniciar el proceso de migración y otro luego del proceso de migración.
 para este ejemplo no se usaran playbooks para esta labor.
 
 ![](images/conv_host_mig_sett_15.png)
@@ -278,20 +278,20 @@ Finalmente se plantea la opción de dejar el plan de migración para ejecutar po
 
 ![](images/conv_host_mig_sett_16.png)
 
-Se finaliza dando click en el boton **Close**
+Se finaliza dando click en el botón **Close**
 
 ![](images/conv_host_mig_sett_17.png)
 
-Si se lecciono la opcion de ejecutar despues el plan se muestra con el boton **Migrate** 
+Si se selecciono la opción de ejecutar después el plan se muestra con el botón **Migrate** 
 
 ![](images/conv_host_mig_sett_18.png)
 
-Si se selecciono la opcion de iniciar inmediatamente, el proceso iniciara una vez de autoapruebe el job por cloudforms
+Si se selecciono la opción de iniciar inmediatamente, el proceso iniciara una vez se auto-apruebe el job por cloudforms
 
 ![](images/conv_host_mig_sett_20.png)
 
-### Proceso de migracion
-El proceso de migracion inicia obteniendo las direcciones ip del servidor. 
+### Proceso de migración
+El proceso de migración inicia obteniendo las direcciones ip del servidor. 
 
 ![](images/migration_plan.png)
 
@@ -305,11 +305,11 @@ Inicial el proceso de conversion del disco
 Se enciende la vm y se refresca el inventario
 ![](images/migration_plan_04.png)
 
-Y finaliza el proceso de migracion
+Y finaliza el proceso de migración
 
 ![](images/migration_plan_05.png)
 
-Se valida en RHVM la correcta ejecucion de la vm
+Se valida en RHVM la correcta ejecución de la vm
 
 ![](images/migrada.png)
 
