@@ -40,6 +40,24 @@ Sobre el ambiente de Red hat Virtualization, se deben garantizar los siguientes 
 - Definir un Domain ISO, que contenga las imágenes iso para las RHV-tools y virtIO.
 - Cargar las imágenes iso [RHV-Tools y VirtIO](https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.3/html-single/administration_guide/index#Uploading_the_VirtIO_and_Guest_Tool_Image_Files_to_an_ISO_Storage_Domain) al Damain ISO.
 
+- Activar los repositorios necesarios sobre rhv-manager y (rhv-host)
+
+**RHV-MANAGER**
+```
+# subscription-manager repos \
+    --disable='*' \
+    --enable=rhel-7-server-rpms \
+    --enable=rhel-7-server-supplementary-rpms \
+    --enable=rhel-7-server-rhv-4.3-manager-rpms \
+    --enable=rhel-7-server-rhv-4-manager-tools-rpms \
+    --enable=rhel-7-server-ansible-2.9-rpms \
+    --enable=jb-eap-7.2-for-rhel-7-server-rpms
+```
+**RHV-HOSTS**
+```
+# subscription-manager repos --enable=rhel-7-server-rhvh-4-rpms
+```
+
 Sobre el servidor RHVM instalar los paquetes que proveen los virtIO y las rhv-tools
 ```
 # yum -y install virtio-win rhv-guest-tools-iso*
@@ -62,23 +80,6 @@ Sobre el servidor RHVM instalar los paquetes que proveen los virtIO y las rhv-to
 >  
 > Si el MAC Address Pool de RHV se solapa con las direcciones de las vm de VMware, se debe asegurar que estas no se dupliquen, si lo hacen fallara la migración.
 
-- Activar los repositorios necesarios sobre rhv-manager y (rhv-host)
-
-**RHV-MANAGER**
-```
-# subscription-manager repos \
-    --disable='*' \
-    --enable=rhel-7-server-rpms \
-    --enable=rhel-7-server-supplementary-rpms \
-    --enable=rhel-7-server-rhv-4.3-manager-rpms \
-    --enable=rhel-7-server-rhv-4-manager-tools-rpms \
-    --enable=rhel-7-server-ansible-2.9-rpms \
-    --enable=jb-eap-7.2-for-rhel-7-server-rpms
-```
-**RHV-HOSTS**
-```
-# subscription-manager repos --enable=rhel-7-server-rhvh-4-rpms
-```
 ## Preparación del Ambiente Cloudforms
 - Agregar proveedor de infraestructura VMware [Aquí](https://access.redhat.com/documentation/en-us/red_hat_cloudforms/5.0/html/managing_providers/infrastructure_providers#vmware_vcenter_providers)
 - Agregar proveedor de infraestructura RHV [Aquí](https://access.redhat.com/documentation/en-us/red_hat_cloudforms/5.0/html/managing_providers/infrastructure_providers#red_hat_virtualization_providers)
