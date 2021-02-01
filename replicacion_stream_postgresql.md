@@ -53,7 +53,7 @@ postgres=# \q
 al finalizar ejecutamos \q para salir de la consola de postgres
 
 ### Activar la interface de red
-Se procede a activar las interfaces de red por donde se expone el servicio de base de datos, para esto sobre la consola bash del user postgres se edita el fichero ```/var/opt/rh/rh-postgresql10/lib/pgsql/data/postgres.conf```, ubicando la linea ```listen_adresses```
+Se procede a activar las interfaces de red por donde se expone el servicio de base de datos, para esto sobre la consola bash del user postgres se edita el fichero ```/var/opt/rh/rh-postgresql10/lib/pgsql/data/postgresql.conf```, ubicando la linea ```listen_adresses```
 
 ```
 Antes
@@ -151,7 +151,7 @@ hot_standby = on
 ```
 
 ### Crear un fichero nuevo recovery.conf
-Es necesario crear el fichero ```/var/opt/rh/rh-postgresql10/lib/pgsql/data/recovery.con```, con el siguiente contenido.
+Es necesario crear el fichero ```/var/opt/rh/rh-postgresql10/lib/pgsql/data/recovery.conf```, con el siguiente contenido.
 
 ```
 standby_mode          = 'on'
