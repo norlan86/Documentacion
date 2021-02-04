@@ -167,24 +167,123 @@ Finalmente es necesario iniciar el servicio de postgresql, el servicio debe subi
 ```
 
 ## Validacion del correcto funcionamiento
-### Queries
+## Queries sobre la base de datos en maestro
+
+1. Validar que la sincronizacion este operativa
 ```
-psql -c "select application_name, state, sync_priority, sync_state from pg_stat_replication;"
-psql -x -c "select * from pg_stat_replication;"
+[root@db1 ~]# su - postgres
+-bash-4.2$ source /opt/rh/rh-postgresql10/enable
+-bash-4.2$
+-bash-4.2$ psql -c "select application_name, state, sync_priority, sync_state from pg_stat_replication;"
+ application_name |   state   | sync_priority | sync_state
+------------------+-----------+---------------+------------
+ walreceiver      | streaming |             0 | async
+(1 row)
+
+-bash-4.2$
+-bash-4.2$ psql -x -c "select * from pg_stat_replication;"
+-[ RECORD 1 ]----+------------------------------
+pid              | 116205
+usesysid         | 23055
+usename          | replicate
+application_name | walreceiver
+client_addr      | 172.18.47.59
+client_hostname  |
+client_port      | 41568
+backend_start    | 2021-02-01 22:52:09.444968+00
+backend_xmin     |
+state            | streaming
+sent_lsn         | 0/8305B28
+write_lsn        | 0/8305B28
+flush_lsn        | 0/8305B28
+replay_lsn       | 0/8305B28
+write_lag        | 00:00:00.000219
+flush_lag        | 00:00:00.000823
+replay_lag       | 00:00:00.000934
+sync_priority    | 0
+sync_state       | async
 
 ```
+2. Verificacion del funcionamiento de la replica, para esto se crea una tabla **replica_test** sobre el maestro y se confirmar sobre el esclavo
+2.1 Revisar que la tabla no exista en ninguno de los nodos
+
+* Maestro
+```
+postgres=# select * from replica_test;
+ERROR:  relation "replica_test" does not exist
+LINE 1: select * from replica_test;
+```
+
+* Esclavo
+```
+postgres=# select * from replica_test;
+ERROR:  relation "replica_test" does not exist
+LINE 1: select * from replica_test;
+```
+2.2 Crear la tabla sobre el Maestro
+```
+postgres=# CREATE TABLE replica_test (test varchar(100));
+CREATE TABLE
+postgres=#
+```
+
+2.3 Validar sobre el esclavo que la tabla este presente
+```
+postgres=# select * from replica_test;
+ test
+------
+(0 rows)
+```
+## Test de escritura
+La base de datos Maestra debe permitir crear o insertar data en ella, pero la esclava debe estar en modo de solo lectura
+
+1. Inserta data sobre la tabla replica_test en el Maestro
+```
+postgres=# INSERT INTO replica_test VALUES ('howtoforge.com');
+INSERT 0 1
+postgres=# INSERT INTO replica_test VALUES ('This is from Master');
+INSERT 0 1
+postgres=#
+postgres=# select * from replica_test;
+        test
+---------------------
+ howtoforge.com
+ This is from Master
+(2 rows)
+
+postgres=#
+```
+
+Sobre el esclavo intentar hacer el otro insert. El resultado debe ser que no puede escribir, pero el select debe mostrar la data replicada.
+```
+postgres=# INSERT INTO replica_test VALUES ('pg replication by hakase-labs');
+ERROR:  cannot execute INSERT in a read-only transaction
+postgres=#
+postgres=# select * from replica_test;
+        test
+---------------------
+ howtoforge.com
+ This is from Master
+(2 rows)
+
+postgres=#
+```
+
 ## Test de failover controlado
 
 1. Bajar el servicio postgresql en el maestro simulando una falla.
    ```
    [root@db1 ~]# systemctl stop rh-postgresql10-postgresql
    ```
+   > **NOTA** Los nodos debe reportar fallas sobre la interface web.
+
 2. Bajar el servicio de tower en los 3 workers
    ``` 
     [root@tower1 ~]# ansible-tower-service stop
     [root@tower2 ~]# ansible-tower-service stop
     [root@tower3 ~]# ansible-tower-service stop
    ```
+   
 3. Editar el fichero /etc/tower/conf.d/postgres.py  para apuntar al nodo esclavo en los 3 nodos workers
 ```
 # Ansible Tower database settings.
@@ -196,7 +295,7 @@ DATABASES = {
        'NAME': 'awx',
        'USER': 'awx',
        'PASSWORD': """XXXXXXXX""",
-       'HOST': 'db2.example.com',  <<<<<<< parametro a ajustar
+       'HOST': 'db2.example.com',  <<<<<<< parametro a ajustar con el nodo esclavo
        'PORT': '5432',
        'OPTIONS': { 'sslmode': 'prefer',
                     'sslrootcert': '/etc/pki/tls/certs/ca-bundle.crt',
@@ -204,22 +303,42 @@ DATABASES = {
    }
 }
 ```
+
 4. Sobre el server de base de datos esclavo realizar lo siguiente:
    * Renombrar el fichero  ```/var/opt/rh/rh-postgresql10/lib/pgsql/data/recovery.conf``` a  ```/var/opt/rh/rh-postgresql10/lib/pgsql/data/old_recovery.conf_old```  
-   *  Comentar los siguientes parametros sobre el ficvhero  ```/var/opt/rh/rh-postgresql10/lib/pgsql/data/postgresql.conf``` 
+   *  Comentar los siguientes parametros sobre el fichero  ```/var/opt/rh/rh-postgresql10/lib/pgsql/data/postgresql.conf```  y ajustar la direccion del listen_address con la direccion del nodo esclavo.
+   ```
+   listen_addresses = 'localhost,172.160.10.66'
+   
+   ... omited
+   #archive_mode = on
+   #archiv_command = 'rsync -a %p postgres@172.16.10.66:/var/log/rh/rh0postgresql10/lib/pgsql/archive/%f'
+   #hot_standby = on 
+   ```
+5. Comentar la linea `host   replication     replicate   172.18.47.59/32       scram-sha-256` sobre el fichero `/var/opt/rh/rh-postgresql10/lib/pgsql/data/pg_hba.conf`
+   ```
+   # !!! This file managed by Ansible. Any local changes may be overwritten. !!!
 
+   # Database administrative login by UNIX sockets
+   # note: you may wish to restrict this further later
+   local   all         postgres                                peer
+
+   # TYPE  DATABASE    USER        CIDR-ADDRESS          METHOD
+   local   all             all                              scram-sha-256
+   host    all             all        0.0.0.0/0             scram-sha-256 
+   host    all             all        ::/0                  scram-sha-256
+   # host   replication     replicate   172.18.47.59/32       scram-sha-256  <<<<< Comentar esta linea.
    ```
-     #archive_mode = on
-     #archiv_command = 'rsync -a %p postgres@172.16.10.66:/var/log/rh/rh0postgresql10/lib/pgsql/archive/%f'
-     #hot_standby = on                       # "on" allows queries during 
-   ```
-5. Reiniciar el servicio postgresql sobre el esclavo
+   
+6. Iniciar el servicio postgresql sobre el esclavo
    ```
     [root@db2 ~]# systemctl start rh-postgresql10-postgresql
    ```
-6. Reiniciar servicios de tower
+   
+7. Por ultimo iniciar servicios de tower en todos los nodos workers
    ```
-    [root@tower1 ~]# ansible-tower-service stop
-    [root@tower2 ~]# ansible-tower-service stop
-    [root@tower3 ~]# ansible-tower-service sto
+    [root@tower1 ~]# ansible-tower-service start
+    [root@tower2 ~]# ansible-tower-service start
+    [root@tower3 ~]# ansible-tower-service start
    ```
+   
