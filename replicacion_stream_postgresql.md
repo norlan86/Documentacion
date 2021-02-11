@@ -148,6 +148,12 @@ listen_addresses = 'localhost,172.16.10.66'
 
 ... omitida
 hot_standby = on
+
+
+... omitida
+#archive_mode = on
+#archive_command = 'rsync -a %p postgres@172.16.10.66:/var/log/rh/rh0postgresql10/lib/pgsql/arch
+ive/%f'
 ```
 
 ### Crear un fichero nuevo recovery.conf
@@ -187,7 +193,7 @@ pid              | 116205
 usesysid         | 23055
 usename          | replicate
 application_name | walreceiver
-client_addr      | 172.18.47.59
+client_addr      | 172.16.10.66
 client_hostname  |
 client_port      | 41568
 backend_start    | 2021-02-01 22:52:09.444968+00
